@@ -3,8 +3,11 @@ Lip Reading for Visual Data by using Deep Learning Methods
 
 For Lip_Reading_RNN+Attention_Richa.py:
 
+Instructions:-
+Run the .py file using command :
+!ipython /content/Lip_Reading_RNN_Richa.py
 
-
+Note:- Please install all the required modules as per your IDE version(Pycharm).
 
 
 For Lip_Reading_Stacked_GRU_Mounica.py :
