@@ -61,7 +61,7 @@ Our dataset consists of a collection of image sequences, or low-quality films, w
 The fact that sequence lengths and, consequently, the amount of characteristics per sequence, vary greatly is one of the key problems that prevents using previous approaches. As a result, different techniques for recording temporal information were employed to take into account all input aspects.Below fig (1) shows the project flow which we have followed.
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[scale=0.35]{Project_flow.png}}
+\centerline{\includegraphics[scale=1.5,width=80mm]{Project_flow.png}}
 \caption{Project Flow Diagram}
 \label{fig}
 \end{figure}
@@ -89,7 +89,7 @@ Collected publicly available free dataset MIRACAL-VC1 and tried to understand th
 \\ The characteristics of the MIRACL-VC1 dataset that it was produced using the speech of 15 individuals.Each speakers spoke ten words and ten sentences ten times, for a total of 3000 instances (15 x 20 x 10). Each instance consists of a series of 640 x 480 pixel color and depth images.To comply with the pre-trained VGGNet model, we just use the colored portion of the image and ignore the depth component.The words and phrases in the dataset are shown in fig(2).
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[scale=0.35]{DATASET.png}}
+\centerline{\includegraphics[scale=1.5,width=80mm]{DATASET.png}}
 \caption{Dataset Architecture}
 \label{fig}
 \end{figure}
@@ -120,7 +120,7 @@ The below architecture as shown in figure() is a combination of RNN with having 
 
 \\ Context Vector:Compute the weighted sum of the SimpleRNN outputs using the attention weights. This aggregation produces a context vector representing the most important parts of the input sequence based on the attention mechanism. 
 
-\\ Output Layer:Connect the context vector to the dense (fully connected) layer, followed by the output layer. The output layer maps the context vector to the desired output format, such as probability distributions or continuous values across different answer options.
+\\ Output Layer:Connect the context vector to the dense (fully connected) layer, followed by the output layer. The output layer maps the context vector to the desired output format, such as probability distributions or continuous values across different answer options. Fig(3) shows the architecture of RNN+Attention model.
 
 \\ Training The Model:Based on your specific task and output format, train your model with the appropriate optimization algorithm (Adam, RMSprop, etc.) and loss function (categorical cross entropy, mean squared error, etc.). 
 
@@ -135,7 +135,7 @@ Another RNN architecture with fewer parameters than LSTM is the GRU (Gated Recur
 
 \\ The GRU model functions as an encoder that progressively processes and records the temporal relationships of the input lip features. The model's GRU layer uses an input sequence to produce a sequence of hidden states. Each hidden state is a representation of the input that has been learned at a specific time step. To encode the temporal context, the encoder's goal is to extract pertinent information from the lip characteristics and condense it into a fixed-length representation (state-h).
 
-\\ The decoder component of the GRU model creates the corresponding voice output sequence using the encoded representation (state-h). The model's decoder RNN layer generates the output for the current time step using the anticipated output from the previous time step as input. Until the whole output sequence is generated, this process is repeated. The attention mechanism is also used by the decoder RNN layer to concentrate on pertinent segments of the input sequence while producing the output. This aids the model in matching the proper speech components with the appropriate lip features. The model's architecture is shown as below:
+\\ The decoder component of the GRU model creates the corresponding voice output sequence using the encoded representation (state-h). The model's decoder RNN layer generates the output for the current time step using the anticipated output from the previous time step as input. Until the whole output sequence is generated, this process is repeated. The attention mechanism is also used by the decoder RNN layer to concentrate on pertinent segments of the input sequence while producing the output. This aids the model in matching the proper speech components with the appropriate lip features. The model's architecture is shown as below in fig(4):
 %\includegraphics[scale=0.35]{Screen Shot 2023-05-14 at 5.02.32 PM.png} \\
 \begin{figure}[htbp]
 \centerline{\includegraphics[scale=0.35]{Screen Shot 2023-05-14 at 5.02.32 PM.png}}
@@ -150,10 +150,10 @@ The LSTM (Long Short-Term Memory) model is a different kind of recurrent neural 
 
 \\ The LSTM model's decoder section uses the encoded representation (state-h) to produce the appropriate voice output sequence. Similar to the encoder, the decoder LSTM layer generates the output for the current time step using the predicted output from the previous time step as input. Until the whole output sequence is generated, this process is repeated. The attention mechanism may be included in the decoder LSTM layer to concentrate on important segments of the input sequence while producing the output. This aids the model in matching the proper speech components with the appropriate lip features.
 
-\\ In order to reduce the category cross-entropy loss between the predicted output and the ground truth speech labels, the model learns to modify its parameters during training.LSTM shown in fig() below:
+\\ In order to reduce the category cross-entropy loss between the predicted output and the ground truth speech labels, the model learns to modify its parameters during training.LSTM shown in fig(5) below:
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[scale=0.35]{LSTM_ARCHI.png}}
+\centerline{\includegraphics[scale=1.5,width=80mm]{LSTM_ARCHI.png}}
 \caption{LSTM Model Architecture}
 \label{fig}
 \end{figure}
@@ -166,10 +166,10 @@ The associations between various lip features throughout the sequence are used b
 
 \\ Multiple parallel self-attention layers are frequently utilized in the Self-Attention+FC model to capture various facets or perspectives on the features of the lip region. The input sequence is attended to differently by each self-attention head, enabling the model to extract a variety of complementing information. In a layer normalization step, the outputs of the multi-head self-attention layers are mixed. By averaging the results across various attention heads, layer normalization aids in the stabilization of the training process.
 
-\\ The output is then transmitted through a feed-forward network after the self-attention layers. The model may learn intricate non-linear mappings between the lip features and the speech output thanks to the feed-forward network's one or more fully connected (dense) layers. The feed-forward network's hidden layers may use activation functions like ReLUs (Rectified Linear Units) to induce nonlinearity. When producing speech output, the Self-Attention+FC model makes use of the self-attention mechanism to record dependencies between various lip features and pay attention to significant visual cues. Self Attention with FC model architecture shown below in fig().
+\\ The output is then transmitted through a feed-forward network after the self-attention layers. The model may learn intricate non-linear mappings between the lip features and the speech output thanks to the feed-forward network's one or more fully connected (dense) layers. The feed-forward network's hidden layers may use activation functions like ReLUs (Rectified Linear Units) to induce nonlinearity. When producing speech output, the Self-Attention+FC model makes use of the self-attention mechanism to record dependencies between various lip features and pay attention to significant visual cues. Self Attention with FC model architecture shown below in fig(6).
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[scale=0.35]{SelfAttention+FC.png}}
+\centerline{\includegraphics[scale=1.5,width=80mm]{SelfAttention+FC.png}}
 \caption{SelfAttention+FC Model Architecture}
 \label{fig}
 \end{figure}
@@ -188,9 +188,9 @@ The RNN+attention model has a lower F1-score but a better validation accuracy, s
 \\ Although precision and recall are both crucial, the importance of each depends on the application. A balance must be struck based on the unique requirements of the task.
 Precision puts an emphasis on reducing false positives, which is crucial when false positives can have serious repercussions (like in a medical diagnosis).
 When false negatives are expensive (as they are when spotting fraud, for example), recall places a strong emphasis on obtaining as many real positives as possible.
-By categorizing predictions, the confusion matrix gives a more detailed view of the model's performance, allowing for additional analysis and insights.
+By categorizing predictions, the confusion matrix gives a more detailed view of the model's performance, allowing for additional analysis and insights.Fig(7) shows the models performance comparison.
 \begin{figure}[htbp]
-\centerline{\includegraphics[scale=0.35]{Evaluation.png}}
+\centerline{\includegraphics[scale=1.5,width=80mm]{Evaluation.png}}
 \caption{Model Performance Comparison}
 \label{fig}
 \end{figure}
@@ -233,31 +233,8 @@ By categorizing predictions, the confusion matrix gives a more detailed view of 
 \\ Increasing training: Training the model for more epochs and with more data. Increasing the vocabulory.
 \section*{Acknowledgment}
 
-The preferred spelling of the word ``acknowledgment'' in America is without 
-an ``e'' after the ``g''. Avoid the stilted expression ``one of us (R. B. 
-G.) thanks $\ldots$''. Instead, try ``R. B. G. thanks$\ldots$''. Put sponsor 
-acknowledgments in the unnumbered footnote on the first page.
+We would like to express our sincere appreciation and gratitude to everyone who contributed to the completion of this report.
 
-\section*{References}
-
-Please number citations consecutively within brackets \cite{b1}. The 
-sentence punctuation follows the bracket \cite{b2}. Refer simply to the reference 
-number, as in \cite{b3}---do not use ``Ref. \cite{b3}'' or ``reference \cite{b3}'' except at 
-the beginning of a sentence: ``Reference \cite{b3} was the first $\ldots$''
-
-Number footnotes separately in superscripts. Place the actual footnote at 
-the bottom of the column in which it was cited. Do not put footnotes in the 
-abstract or reference list. Use letters for table footnotes.
-
-Unless there are six authors or more give all authors' names; do not use 
-``et al.''. Papers that have not been published, even if they have been 
-submitted for publication, should be cited as ``unpublished'' \cite{b4}. Papers 
-that have been accepted for publication should be cited as ``in press'' \cite{b5}. 
-Capitalize only the first word in a paper title, except for proper nouns and 
-element symbols.
-
-For papers published in translation journals, please give the English 
-citation first, followed by the original foreign-language citation \cite{b6}.
 
 \begin{thebibliography}{00}
 \bibitem{b1} Prajwal, K. R., Mukhopadhyay, R., Namboodiri, V. P., & Jawahar, C. V. (2020). Learning Individual Speaking Styles for Accurate Lip to Speech Synthesis. https://doi.org/10.1109/cvpr42600.2020.01381.
@@ -269,8 +246,6 @@ citation first, followed by the original foreign-language citation \cite{b6}.
 \bibitem{b6} Torfi, A. (2018). SpeechPy - A Library for Speech Processing and Recognition. Journal of Open Source Software. https://doi.org/10.21105/joss.00749
 \end{thebibliography}
 \vspace{12pt}
-\color{red}
-IEEE conference templates contain guidance text for composing and formatting conference papers. Please ensure that all template text is removed from your conference paper prior to submission to the conference. Failure to remove the template text from your paper may result in your paper not being published.
+
 
 \end{document}
-
