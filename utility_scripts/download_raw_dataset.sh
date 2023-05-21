@@ -7,6 +7,6 @@ curl -L -o data/MIRACL-VC1_all_in_one.zip -b cookies.txt "https://drive.google.c
 rm cookies.txt
 
 # Unzipping the dataset
-echo "Unzipping the data to dataset to data/"
+echo "Unzipping the data to dataset to data/MIRACL-VC1_all_in_one/"
 unzip data/MIRACL-VC1_all_in_one.zip -d data/MIRACL-VC1_all_in_one &> /dev/null
 
