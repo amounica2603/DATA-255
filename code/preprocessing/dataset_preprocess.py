@@ -7,7 +7,7 @@ from keras.applications.vgg16 import VGG16
 from keras.models import Model
 from tqdm import tqdm
 
-from preprocessing.mouth_extract import ImageMouthExtractor
+from code.preprocessing.mouth_extract import ImageMouthExtractor
 
 
 class LipReadingImageProcessor:
