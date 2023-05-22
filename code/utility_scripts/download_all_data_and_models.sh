@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # download raw dataset
-#./utility_scripts/download_raw_dataset.sh
+./utility_scripts/download_raw_dataset.sh
 
 # Download preprocessed data
 ./utility_scripts/download_processed_dataset.sh

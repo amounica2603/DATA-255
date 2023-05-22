@@ -8,16 +8,21 @@ from preprocessing.dataset_preprocess import LipReadingImageProcessor
 DATASET_PATH = 'dataset'
 SHAPE_PREDICTOR_MODEL_PATH = 'utility_models/shape_predictor_68_face_landmarks.dat'
 
+logging.getLogger().setLevel('INFO')
 
+
+# check for the data availability using the command run from DATA-255/code directory:
+# python preprocess_data.py --check_data_availability True
 def main(dataset_path, check_data_availability, preprocessed_data, features_data):
     data_preprocessor = LipReadingImageProcessor(dataset_base_path=dataset_path,
                                                  shape_predictor_path=SHAPE_PREDICTOR_MODEL_PATH)
 
-    dataset_metadata = [data_preprocessor.get_dataset_metadata()]
-    logging.info(f'Person Ids: {dataset_metadata[0]}\n'
-                 f'Phrases Ids: {dataset_metadata[1]}\n'
-                 f'Words Ids: {dataset_metadata[1]}\n'
-                 f'Utterance Ids for Phrases and Words: {dataset_metadata[2]}')
+    person_ids, phrase_word_ids, uttr_ids = data_preprocessor.get_dataset_metadata()
+
+    logging.info(f'Person Ids: {person_ids}\n'
+                 f'Phrases Ids: {phrase_word_ids}\n'
+                 f'Words Ids: {phrase_word_ids}\n'
+                 f'Utterance Ids for Phrases and Words: {uttr_ids}')
 
     if check_data_availability:
         if os.path.isdir(data_preprocessor.raw_data_path):
