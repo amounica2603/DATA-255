@@ -1,3 +1,4 @@
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.layers import Conv3D, MaxPooling3D, BatchNormalization, Input, Flatten, Dense, Reshape, \
     RepeatVector, LSTM, TimeDistributed
 from tensorflow.keras import Sequential, Model
@@ -30,20 +31,51 @@ class LipreadingLSTMModel:
         :return: a Keras model that takes in two inputs (encoder_inputs and decoder_inputs) and outputs decoder_outputs. The
         model consists of an encoder LSTM layer, a decoder LSTM layer, and a dense layer with softmax activation.
         """
-        # encoder
-        encoder_inputs = Input(shape=(time_steps_encoder, num_encoder_tokens), name="encoder_inputs")
-        encoder = LSTM(latent_dim, return_state=True, return_sequences=True, name='endcoder_lstm')
-        _, state_h, state_c = encoder(encoder_inputs)
-        encoder_states = [state_h, state_c]
+        # Define the input shape
+        encoder_inputs = Input(shape=(16, 4096))
 
-        # decoder
-        decoder_inputs = Input(shape=(time_steps_decoder, num_decoder_tokens), name="decoder_inputs")
-        decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True, name='decoder_lstm')
-        decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
-        decoder_dense = Dense(num_decoder_tokens, activation='softmax', name='decoder_relu')
-        decoder_outputs = decoder_dense(decoder_outputs)
+        # Define the encoder RNN layer
+        encoder_rnn = SimpleRNN(256, return_sequences=True, return_state=True, dropout=0.6, recurrent_dropout=0.6)
+        # Get the output and state from the encoder
+        encoder_outputs, state_h = encoder_rnn(encoder_inputs)
+        print(state_h.shape)
+        # Define the decoder RNN layer
+        decoder_rnn = SimpleRNN(256, return_sequences=True, return_state=True, dropout=0.6, recurrent_dropout=0.6)
+        # Define the attention layer
+        attention_layer1 = Dense(16, activation='relu')
+        attention_layer2 = Dense(16, activation='relu')
+        attention_layer3 = Dense(16, activation='relu')
 
-        model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+        # Define the output dense layer
+        decoder_dense = Dense(50, activation='softmax')
+
+        # Define the decoder input layer
+        decoder_inputs = Input(shape=(16, 50))
+        # print(decoder_inputs.shape)
+        # Initialize the initial state with the encoder state
+        initial_state = [state_h]
+
+        # Get the decoder outputs and states from the decoder layer
+        decoder_outputs, _ = decoder_rnn(decoder_inputs, initial_state=initial_state)
+        print(decoder_outputs.shape)
+        # Calculate the attention weights
+        attention_weights = attention_layer1(decoder_outputs)
+        attention_weights1 = attention_layer2(attention_weights)
+        attention_weights2 = attention_layer3(attention_weights1)
+
+        # print(attention_weights.shape)
+        # Perform dot product between attention weights and encoder outputs
+        context_vector = Dot(axes=1)([attention_weights2, encoder_outputs])
+
+        # Concatenate the context vector and decoder output
+        decoder_combined_context = Concatenate(axis=-1)([context_vector, decoder_outputs])
+
+        # Pass the concatenated tensor through a dense layer
+        output = decoder_dense(decoder_combined_context)
+
+        # Define the model and compile
+        model = Model([encoder_inputs, decoder_inputs], output)
+
         print(model.summary())
 
         return model
@@ -53,6 +85,7 @@ class LipreadingLSTMModel:
         This function trains a model using early stopping, model checkpointing, and learning rate reduction callbacks.
         :return: the training history of the model.
         """
+        # Split the data into train and test sets
         train_encoder_input_data, test_encoder_input_data, train_decoder_input_data, test_decoder_input_data, train_decoder_target_data, test_decoder_target_data = train_test_split(
             self.data['encoder_ip'], self.data['decoder_ip'], self.data['decoder_trg'], test_size=0.2, random_state=42)
 
@@ -66,13 +99,12 @@ class LipreadingLSTMModel:
                                      save_best_only=True, mode='min')
         reduce_lr = ReduceLROnPlateau(monitor='val_accuracy', factor=0.5, patience=5, min_lr=0.0001)
 
-        opt = keras.optimizers.Adam(learning_rate=self.initial_lr)
-        self.model.compile(metrics=['accuracy'], optimizer=opt, loss='categorical_crossentropy')
+        self.model.compile(metrics=['accuracy'], optimizer='adam', loss='categorical_crossentropy')
 
         history = self.model.fit([train_encoder_input_data, train_decoder_input_data], train_decoder_target_data,
                                  batch_size=64,
-                                 epochs=self.epochs,
-                                 validation_split=self.validation_split,
+                                 epochs=100,
+                                 validation_split=0.2,
                                  callbacks=[earlystopping, checkpoint, reduce_lr])
 
         # Evaluate the model on the validation set
@@ -80,6 +112,7 @@ class LipreadingLSTMModel:
                                                 val_decoder_target_data)
         print("Validation loss:", val_loss)
         print("Validation accuracy:", val_acc)
+
         return history
 
     def plot_loss_acc(self):
