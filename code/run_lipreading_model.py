@@ -3,6 +3,7 @@ import logging
 
 from models.lipreading_lstm_model import LipreadingLSTMModel
 from models.lipreading_rnn_attention_model import LipreadingRNNModel
+from models.lipreading_self_attention_model import LipreadingSelfAttentionModel
 from models.lipreading_stacked_gru_model import LipreadingGRUModel
 from preprocessing.dataset_preprocess import LipReadingImageProcessor
 
@@ -21,7 +22,7 @@ def main(model_name='LSTM', num_epochs=100):
         model = LipreadingGRUModel(data, epochs=num_epochs)
     elif model_name == 'SELF_ATTENTION':
         data = data_processor.get_datasets_for_model()
-        model = LipreadingLSTMModel(data, epochs=num_epochs)
+        model = LipreadingSelfAttentionModel(data, epochs=num_epochs)
     else:
         logging.error(f'No model available with the name: [{model_name}]\n '
                       f'Available models: [LSTM, RNN, GRU, SELF_ATTENTION]')

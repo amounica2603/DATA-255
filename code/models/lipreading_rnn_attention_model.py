@@ -73,7 +73,7 @@ class LipreadingRNNModel:
         # Define the model and compile
         model = Model([encoder_inputs, decoder_inputs], output)
 
-        print(model.summary())
+        model.summary()
 
         return model
 

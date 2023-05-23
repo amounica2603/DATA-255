@@ -75,7 +75,7 @@ class LipreadingGRUModel:
         # Define the model
         model = Model([encoder_inputs, decoder_inputs_1, decoder_inputs_2, decoder_inputs_3], decoder_outputs)
 
-        print(model.summary())
+        model.summary()
 
         return model
 
@@ -97,6 +97,10 @@ class LipreadingGRUModel:
         # Compile the model
         self.model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
+        earlystopping = EarlyStopping(monitor='val_loss', patience=6, verbose=1, mode='min')
+        checkpoint = ModelCheckpoint('saved_model_weights/lipreading_gru_best_model.h5', monitor='val_loss', verbose=1,
+                                     save_best_only=True, mode='min')
+
         # Fit the model on the training data with validation
         history = self.model.fit(
             [train_encoder_input_data, train_decoder_input_data, train_decoder_input_data, train_decoder_input_data],
@@ -105,10 +109,13 @@ class LipreadingGRUModel:
             epochs=100,
             validation_data=(
                 [val_encoder_input_data, val_decoder_input_data, val_decoder_input_data, val_decoder_input_data],
-                val_decoder_target_data))
+                val_decoder_target_data),
+            callbacks=[earlystopping, checkpoint]
+        )
 
         # Evaluate the model on the validation set
-        val_loss, val_acc = self.model.evaluate([val_encoder_input_data, val_decoder_input_data],
+        val_loss, val_acc = self.model.evaluate([val_encoder_input_data, val_decoder_input_data, val_decoder_input_data,
+                                                 val_decoder_input_data],
                                                 val_decoder_target_data)
         print("Validation loss:", val_loss)
         print("Validation accuracy:", val_acc)

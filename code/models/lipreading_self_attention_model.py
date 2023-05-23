@@ -1,6 +1,7 @@
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.layers import Input, Dense, LSTM
-from tensorflow.keras import Model
+from tensorflow.keras.layers import GRU, Input, Dense, Reshape, MultiHeadAttention
+from tensorflow.keras.models import Model
+import tensorflow as tf
 import keras
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 import matplotlib.pyplot as plt
@@ -15,7 +16,7 @@ time_steps_decoder = 5
 
 # The LipreadingLSTMModel class defines a model that uses LSTM layers for encoding and decoding input sequences, and
 # includes functions for training the model and plotting its loss and accuracy.
-class LipreadingLSTMModel:
+class LipreadingSelfAttentionModel:
     def __init__(self, data, epochs=100, initial_lr=0.01, validation_split=0.2):
         self.data = data
         self.epochs = epochs
@@ -25,61 +26,76 @@ class LipreadingLSTMModel:
         self.history = self.train_model()
 
     def get_model(self):
-        """
-        This function returns a model that uses LSTM layers for encoding and decoding input sequences.
-        :return: a Keras model that takes in two inputs (encoder_inputs and decoder_inputs) and outputs decoder_outputs. The
-        model consists of an encoder LSTM layer, a decoder LSTM layer, and a dense layer with softmax activation.
-        """
-        # encoder
-        encoder_inputs = Input(shape=(time_steps_encoder, num_encoder_tokens), name="encoder_inputs")
-        encoder = LSTM(latent_dim, return_state=True, return_sequences=True, name='endcoder_lstm')
-        _, state_h, state_c = encoder(encoder_inputs)
-        encoder_states = [state_h, state_c]
+        encoder_inputs = Input(shape=(16, 4096))
+        encoder_outputs = Reshape((-1, 4096))(encoder_inputs)
 
-        # decoder
-        decoder_inputs = Input(shape=(time_steps_decoder, num_decoder_tokens), name="decoder_inputs")
-        decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True, name='decoder_lstm')
-        decoder_outputs, _, _ = decoder_lstm(decoder_inputs, initial_state=encoder_states)
-        decoder_dense = Dense(num_decoder_tokens, activation='softmax', name='decoder_relu')
-        decoder_outputs = decoder_dense(decoder_outputs)
+        # Decoder
+        decoder_inputs = Input(shape=(6, 4096))
+        decoder_outputs = Reshape((-1, 4096))(decoder_inputs)
 
+        # Multi-head attention with encoder-decoder attention
+        attention = MultiHeadAttention(num_heads=16, key_dim=128)
+        decoder_outputs = attention(decoder_outputs, encoder_outputs)
+
+        # Additional layers
+        decoder_outputs = Dense(2048, activation='relu')(decoder_outputs)
+        decoder_outputs = Dense(1024, activation='relu')(decoder_outputs)
+        decoder_outputs = Dense(512, activation='relu')(decoder_outputs)
+
+        # Concatenate encoder-decoder attention output and decoder inputs
+        concat_inputs = tf.concat([decoder_outputs, decoder_inputs], axis=-1)
+
+        # Dense layer for prediction
+        dense = Dense(50, activation='softmax')
+        decoder_outputs = dense(concat_inputs)
+
+        # Define the model
         model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
+
         model.summary()
 
         return model
 
     def train_model(self):
-        """
-        This function trains a model using early stopping, model checkpointing, and learning rate reduction callbacks.
-        :return: the training history of the model.
-        """
-        train_encoder_input_data, test_encoder_input_data, train_decoder_input_data, test_decoder_input_data, train_decoder_target_data, test_decoder_target_data = train_test_split(
-            self.data['encoder_ip'], self.data['decoder_ip'], self.data['decoder_trg'], test_size=0.2, random_state=42)
-
-        # Split the train set into train and validation sets
-        train_encoder_input_data, val_encoder_input_data, train_decoder_input_data, val_decoder_input_data, train_decoder_target_data, val_decoder_target_data = train_test_split(
-            train_encoder_input_data, train_decoder_input_data, train_decoder_target_data, test_size=0.1,
-            random_state=42)
-
-        earlystopping = EarlyStopping(monitor='val_loss', patience=6, verbose=1, mode='min')
-        checkpoint = ModelCheckpoint('saved_model_weights/lipreading_rnn_best_model.h5', monitor='val_loss', verbose=1,
-                                     save_best_only=True, mode='min')
+        earlystopping = EarlyStopping(monitor='val_loss', patience=10, verbose=1, mode='min')
+        checkpoint = ModelCheckpoint('saved_model_weights/lipreading_self_attention_best_model.h5', monitor='val_loss',
+                                     verbose=1, save_best_only=True, mode='min')
         reduce_lr = ReduceLROnPlateau(monitor='val_accuracy', factor=0.5, patience=5, min_lr=0.0001)
 
-        opt = keras.optimizers.Adam(learning_rate=self.initial_lr)
+        opt = keras.optimizers.Adam(learning_rate=0.01)
+
         self.model.compile(metrics=['accuracy'], optimizer=opt, loss='categorical_crossentropy')
+
+        import numpy as np
+
+        # Pad the decoder inputs
+        padded_decoder_inputs = np.pad(self.data['decoder_ip'], ((0, 0), (0, 1), (0, 4046)), mode='constant')
+
+        # Pad the decoder targets
+        padded_decoder_targets = np.pad(self.data['decoder_trg'], ((0, 0), (0, 1), (0, 0)), mode='constant')
+
+        # Split the data into train and test sets
+        train_encoder_input_data, test_encoder_input_data, train_decoder_input_data, test_decoder_input_data, train_decoder_target_data, test_decoder_target_data = train_test_split(
+            self.data['encoder_ip'], padded_decoder_inputs, padded_decoder_targets, test_size=0.2, random_state=42)
+
+        # Further split the training data into train and validation sets
+        train_encoder_input_data, val_encoder_input_data, train_decoder_input_data, val_decoder_input_data, train_decoder_target_data, val_decoder_target_data = train_test_split(
+            train_encoder_input_data, train_decoder_input_data, train_decoder_target_data, test_size=0.2,
+            random_state=42)
 
         history = self.model.fit([train_encoder_input_data, train_decoder_input_data], train_decoder_target_data,
                                  batch_size=64,
-                                 epochs=self.epochs,
-                                 validation_split=self.validation_split,
+                                 epochs=100,
+                                 validation_split=0.2,
                                  callbacks=[earlystopping, checkpoint, reduce_lr])
 
         # Evaluate the model on the validation set
-        val_loss, val_acc = self.model.evaluate([val_encoder_input_data, val_decoder_input_data],
+        val_loss, val_acc = self.model.evaluate([val_encoder_input_data, val_decoder_input_data, val_decoder_input_data,
+                                                 val_decoder_input_data],
                                                 val_decoder_target_data)
         print("Validation loss:", val_loss)
         print("Validation accuracy:", val_acc)
+
         return history
 
     def plot_loss_acc(self):
