@@ -9,4 +9,4 @@ rm cookies.txt
 # Unzipping the dataset
 echo "Unzipping the data to dataset to dataset/MIRACL-VC1_all_in_one/"
 unzip dataset/MIRACL-VC1_all_in_one.zip -d dataset/MIRACL-VC1_all_in_one &> /dev/null
-
+rm dataset/MIRACL-VC1_all_in_one/calib.txt

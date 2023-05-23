@@ -7,9 +7,12 @@ from keras.applications.vgg16 import VGG16
 from keras.models import Model
 from tqdm import tqdm
 
+from preprocessing.label_tokenization import LabelTokenizer
 from preprocessing.mouth_extract import ImageMouthExtractor
 
 
+# The LipReadingImageProcessor class preprocesses lip reading data by extracting mouth images and extracting features
+# using a VGG16 model.
 class LipReadingImageProcessor:
     def __init__(self, dataset_base_path, shape_predictor_path):
         self.base_path = dataset_base_path
@@ -94,12 +97,24 @@ class LipReadingImageProcessor:
                                 print(f'Exception {e}')
 
     def _load_cnn_vgg_model(self):
+        """
+        This function loads a pre-trained VGG16 model with weights from ImageNet and removes the last layer to output the
+        second to last layer.
+        """
         model = VGG16(weights="imagenet", include_top=True, input_shape=(224, 224, 3))
         out = model.layers[-2].output
         model_final = Model(inputs=model.input, outputs=out)
         self.cnn_model = model_final
 
     def _extract_instance_features(self, instance_path):
+        """
+        This function extracts features from a set of images using a pre-trained CNN model and returns the features as an
+        array.
+
+        :param instance_path: The path to the directory containing the images of an instance
+        :return: the image features extracted from a set of images in a given directory path. The image features are
+        extracted using a pre-trained CNN model and returned as a numpy array.
+        """
         image_list = os.listdir(instance_path)
         samples = np.round(np.linspace(
             0, len(image_list) - 1, 16))
@@ -115,6 +130,9 @@ class LipReadingImageProcessor:
         return img_feats
 
     def extract_save_img_features(self):
+        """
+        This function extracts and saves image features using a pre-trained CNN VGG model.
+        """
         if not self.cnn_model:
             self._load_cnn_vgg_model()
         if self.processed_features_path in os.listdir():
@@ -125,3 +143,48 @@ class LipReadingImageProcessor:
             img_feature_stack = self._extract_instance_features(os.path.join(self.processed_data_path, instance_path))
             np.save(os.path.join(self.processed_features_path, instance_path),
                     img_feature_stack)
+
+    def get_datasets_for_model(self):
+        """
+        This function loads preprocessed data into memory and returns the encoder input data, decoder input data, and
+        decoder target data for a model.
+        :return: A dictionary containing three keys: 'encoder_ip', 'decoder_ip', and 'decoder_trg', each with corresponding
+        numpy arrays as their values.
+        """
+        # specify the preprocessed dataset path
+        person_ids, uttr_indexes, instances = self.get_dataset_metadata()
+
+        label_tokenizer = LabelTokenizer()
+        # Load the data into memory
+        encoder_input_data = []
+        target_texts = []
+        for idx, (person_id, uttr, uttr_index, instance_index) in tqdm(
+                enumerate([(person_id, uttr, uttr_index, instance_index)
+                           for person_id in person_ids
+                           for uttr in ('words', 'phrases')
+                           for uttr_index in uttr_indexes
+                           for instance_index in instances])):
+            frames_path = os.path.join(self.processed_features_path,
+                                       f'{person_id}_{uttr}_{uttr_index}_{instance_index}.npy')
+            encoder_input_data.append(np.load(frames_path))
+            if uttr == 'words':
+                target_texts.append(f'<start> {label_tokenizer.words[uttr_indexes.index(uttr_index)]} <end>')
+            else:
+                target_texts.append(f'<start> {label_tokenizer.phrases[uttr_indexes.index(uttr_index)]} <end>')
+
+        print(len(target_texts))
+        decoder_input_data, decoder_target_data = label_tokenizer.get_label_tokens(target_texts)
+
+        encoder_input_data = np.array(encoder_input_data)
+        decoder_input_data = np.array(decoder_input_data)
+        decoder_target_data = np.array(decoder_target_data)
+
+        print('encoder_input_data shape:', encoder_input_data.shape)
+        print('decoder_input_data shape:', decoder_input_data.shape)
+        print('decoder_target_data shape:', decoder_target_data.shape)
+
+        indices = np.random.permutation(encoder_input_data.shape[0])
+
+        return {'encoder_ip': encoder_input_data[indices],
+                'decoder_ip': decoder_input_data[indices],
+                'decoder_trg': decoder_target_data[indices]}
