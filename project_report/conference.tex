@@ -30,11 +30,11 @@ himanshee@sjsu.edu}
 San Jose, CA \\
 mounica.ayalasomayajula@sjsu.edu}
 \and
-\IEEEauthorblockN{3\textsuperscript{rd} Mythri}
+\IEEEauthorblockN{3\textsuperscript{rd} Mythri Muchamari}
 \IEEEauthorblockA{\textit{dept. MSDA} \\
 %\textit{name of organization (of Aff.)}\\
 San Jose, CA \\
-mythri.muchmari@sjsu.edu}
+mythri.muchamari@sjsu.edu}
 \and
 \IEEEauthorblockN{4\textsuperscript{th} Richa Sharma}
 \IEEEauthorblockA{\textit{dept. MSDA} \\
@@ -95,22 +95,28 @@ Collected publicly available free dataset MIRACAL-VC1 and tried to understand th
 \end{figure}
 
 \subsection{Data Pre-processing}
+\\  We have done our data preprocessing in two steps, one for the input data -sequence of frames and step two is to preprocess the target data – Labels. 
 \begin{itemize}
-\item Loading the face detetector: Used the Dlib face detector. It detected the mouth region from the face and then cropped that part and created image sequences. Dlib offers a face detector model that has already been trained to find faces in pictures. 
+\item Loading the face detetector: Used the Dlib face detector.Dlib offers a face detector model that has already been trained to find faces in pictures. 
 \item Face Detection: We use the face detector model to find faces in image or video frames once it has loaded. After analyzing the image, the face detector outputs the bounding box coordinates of each face it finds.
 \item Mouth Extraction: The coordinates of the mouth region can be obtained from the faces that have been detected. A number of distinct landmarks, such as the corners of the lips, serve as the traditional delineators of the mouth region. These facial landmarks can be located using the pre-trained facial landmark detector that Dlib offers.
 \item Cropping the mouth area: Using the mouth landmarks, we crop the picture or frame to simply show the area around the mouth. Using the locations of the landmarks, a rectangle zone around the mouth is defined and extracted in this stage.
 \item Make image sequences: Using video, we extract the mouth region from each frame of the film by repeating the procedures above for each frame. The mouth movement over time will be represented by a series of photos as a result of this.
 \item Data Augumentation: We employed data augmentation to fictitiously enhance the data size in order to address this issue. The original image has been changed in the following two ways as part of our data augmentation:(i) When cropping, nudged the crop area randomly in both the horizontal and vertical directions. (ii) By fluctuating the image's brightness or contrast at random.
 \item Phrases and words: Added our target phrases and words.
-\item Image Feature Extraction using VGG16: Used VGG net to extract features from these image sequences. The image sequences can be passed through the network to extract features after the VGG16 model has been loaded and the image sequences have undergone preprocessing. Multiple convolutional layers make up the VGG16 model, which gradually learns and extracts visual information from the input images. The output of these convolutional layers acts as a learnt feature-based representation of the input image.
+\item Image Feature Extraction using VGG16: Used VGG net to extract features from these image sequences. The image sequences can be passed through the network to extract features after the VGG16 model has been loaded and the image sequences have undergone preprocessing. Multiple convolutional layers make up the VGG16 model, which gradually learns and extracts visual information from the input images. The output of these convolutional layers acts as a learnt feature-based representation of the input image.The output of these convolutional layers acts as a learnt feature-based representation of th input image with the dimension of N*16*4096.
+\item Preprocessing Target labels: we performed word embeddings using a tokenizer. This step allowed us to preprocess the textual data by converting it into tokens. Each token represents a specific word in the text. Consequently, these tokens will be converted into numerical representations, enabling computational analysis.
+In order to generate tokenized sequences, we incorporated the <start> and <end> tokens into the tokenizer. These additional tokens serve as markers for the beginning and end of each sequence, Moreover, we ensured that the sequences were padded with a vector length of 50, enabling consistent dimensions for further processing and modeling.
+
 \item Data preparation before Modeling: Prepared the extracted features as input features and the target text as input for the encoders and decoders.
+\item Real Time Processing:We did real time data processing using FPS, it is nothing but "frame per second". Simply means FPS value indicates how many frames per second a lip-reading system can process or analyze. In general, a higher FPS score indicates faster processing, smoother real-time performance, and the ability of the system to deliver lip-reading results with minimal latency. 
+
 \end{itemize}
 
 \subsection{Models Implemented}
-This section describes the numerous approaches we used to employ i.e. RNN with attention mechanism, LSTM, GRU and self-attention with fully connected layersm to try to solve the lip reading challenge. 
+This section describes the numerous approaches we used to employ i.e. RNN with attention mechanism, LSTM, GRU and self-attention with fully connected layersm to try to solve the lip reading challenge.We have used same paramerters for all the models model parameters such as  batch size, epochs, learnable parameters etc.  
 \subsubsection{RNN+Attention}
-The below architecture as shown in figure() is a combination of RNN with having attention layers.It has few learnable parameters to map the extracted features from using pre trained VGGnet model as a cropped image of mouth from the sequence of faces image and spoken words to train or learn the simple RNN models with adding attention mechanism and dropout, which has improved the performance of the model.
+The below architecture as shown in figure(3) is a combination of RNN with having attention layers.It has few learnable parameters to map the extracted features from using pre trained VGGnet model as a cropped image of mouth from the sequence of faces image and spoken words to train or learn the simple RNN models with adding attention mechanism and dropout, which has improved the performance of the model. This model has used less number of learnable parameters 1,223,266 compared to other models.
 
 \\ Input encoding:Convert the input text to a numeric representation using techniques such as word embedding (sequence to sequence , GloVe, etc.) and character embedding. This step obtains the semantic meaning of the words or characters in the input.
 
@@ -173,6 +179,15 @@ The associations between various lip features throughout the sequence are used b
 \caption{SelfAttention+FC Model Architecture}
 \label{fig}
 \end{figure}
+
+Using identical model parameters shown as fig(7), we ensured a fair and objective comparison between the four models. This approach allowed us to identify the best performing model for a given dataset. 
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[scale=1.5,width=80mm]{Model_Parameters.png}}
+\caption{Models Parameters}
+\label{fig}
+\end{figure}
+
 \subsection{Train and Validate the Model}
 To divide the data into train and test sets, we use the train test split function from the sklearn.model selection module is utilized.
 Separate inputs are split up for the encoder, decoder, and target (ground truth). A test size of 0.2 is used for the split, allocating 20 percent of the data to the test set. For reproducibility, the random state parameter is set to 42.
@@ -188,9 +203,9 @@ The RNN+attention model has a lower F1-score but a better validation accuracy, s
 \\ Although precision and recall are both crucial, the importance of each depends on the application. A balance must be struck based on the unique requirements of the task.
 Precision puts an emphasis on reducing false positives, which is crucial when false positives can have serious repercussions (like in a medical diagnosis).
 When false negatives are expensive (as they are when spotting fraud, for example), recall places a strong emphasis on obtaining as many real positives as possible.
-By categorizing predictions, the confusion matrix gives a more detailed view of the model's performance, allowing for additional analysis and insights.Fig(7) shows the models performance comparison.
+By categorizing predictions, the confusion matrix gives a more detailed view of the model's performance, allowing for additional analysis and insights.Fig(8) shows the models performance comparison.
 \begin{figure}[htbp]
-\centerline{\includegraphics[scale=1.5,width=80mm]{Evaluation.png}}
+\centerline{\includegraphics[scale=1.5,width=100mm]{Evaluation.png}}
 \caption{Model Performance Comparison}
 \label{fig}
 \end{figure}
@@ -224,6 +239,13 @@ By categorizing predictions, the confusion matrix gives a more detailed view of 
  Handling overfitting and underfitting issues.
  Real time Lip Reading Model: Working with real time data / Unseen data.
 \section{Discussion and Future Improvements}
+
+\\ Our project have opportunity for future scope such as making this application robust to real time data.
+
+Real-Time Integration: Merge our lip-reading application with real-time video streaming platforms or communication applications to enable live lip reading. This will allow users to receive instant transcription or translation of spoken words during video calls or presentations.
+
+\\ Speech Synthesis: Combine our lip-reading technology with text-to-speech synthesis. By generating spoken output from the lip-reading data, this application must be able to assist individuals who have speech disabilities, enabling them to communicate more easily.
+
 \\ Performance: RNN with attention model has given the best accuracy as compared to other models. 
 
 \\ Memory: RNN with attention model has the least number of parameters.
