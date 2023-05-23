@@ -75,7 +75,7 @@ code
    2. This will display the download progress and should take about 3mins depending on internet bandwidth
    3. It will download all the zipped data sets to `dataset` folder and unzips them into the same location.
 
-### 3. Run the model scripts [data_prep->train->validate->display plots]
+### 3. Run the model scripts [data_prep->train->save best model weights->validate->display plots]
 1. This project contains 4 fully implemented deep learning models using different techniques that can be accessed using `run_lipreading_model.py`. Running it with `--help` will give us the usage details.
    1. Command: `python run_lipreading_model.py --help`
    2. Output: 
