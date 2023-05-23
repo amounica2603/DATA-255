@@ -29,11 +29,11 @@ def main(dataset_path, check_data_availability, preprocessed_data, features_data
             logging.info(f'Raw data available under: {data_preprocessor.raw_data_path}')
         else:
             logging.warning(f'Raw data is not found under: {data_preprocessor.raw_data_path}')
-        if os.path.isdir(data_preprocessor.raw_data_path):
+        if os.path.isdir(data_preprocessor.processed_data_path):
             logging.info(f'Processed data available under: {data_preprocessor.processed_data_path}')
         else:
             logging.warning(f'Processed data is not found under: {data_preprocessor.processed_data_path}')
-        if os.path.isdir(data_preprocessor.raw_data_path):
+        if os.path.isdir(data_preprocessor.processed_features_path):
             logging.info(f'Features data available under: {data_preprocessor.processed_features_path}')
         else:
             logging.warning(f'Features data is not found under: {data_preprocessor.processed_features_path}')

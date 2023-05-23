@@ -42,4 +42,4 @@ if __name__ == '__main__':
                              'The models are set for early stopping with a default of 100',
                         default=100)
     input_args = parser.parse_args()
-    main(model_name=input_args.model_name, num_epochs=input_args.epochs)
+    main(model_name=input_args.model_name, num_epochs=int(input_args.epochs))

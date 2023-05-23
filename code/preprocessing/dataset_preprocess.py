@@ -28,7 +28,7 @@ class LipReadingImageProcessor:
         This function retrieves metadata about the dataset, including the person IDs, utterance indices, and instance
         indices.
         """
-        if os.path.isdir(self.raw_data_path):
+        if os.path.isdir(self.raw_data_path) and os.listdir(self.raw_data_path):
             person_ids = sorted(os.listdir(self.raw_data_path))
             uttr_idxs = sorted(os.listdir(f'{self.raw_data_path}/{person_ids[0]}/phrases/'))
             instance_idxs = sorted(os.listdir(f'{self.raw_data_path}/{person_ids[0]}/phrases/{uttr_idxs[0]}'))
