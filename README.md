@@ -104,3 +104,7 @@ Make sure current working directory is `code`
          1. ![img.png](readme_images/data_check_cmd_op.png)
    4. We can use other arguments to create that dataset from previous dataset. The order of creation is MIRACL-VC1_all_in_one -> MIRACL_Processed -> MIRACL_Processed_cnn_features. For eg. to create MIRACL_Processed from MIRACL-VC1 use below command,
       1. `python preprocess_data.py --preprocessed_data True`
+
+## Contributions
+
+1. Literature Survey
