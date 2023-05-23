@@ -85,7 +85,7 @@ class LipreadingSelfAttentionModel:
 
         history = self.model.fit([train_encoder_input_data, train_decoder_input_data], train_decoder_target_data,
                                  batch_size=64,
-                                 epochs=100,
+                                 epochs=self.epochs,
                                  validation_split=0.2,
                                  callbacks=[earlystopping, checkpoint, reduce_lr])
 
