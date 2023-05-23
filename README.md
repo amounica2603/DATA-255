@@ -70,12 +70,14 @@ code
    1. `pip install -r requirements.txt`
    
 ### 2. Download datasets and shape predictor model required for preprocessing
+Make sure current working directory is `code`
 1. The datasets are stored in Gdrive at different stages of preprocessing. We have individual scripts under `utility_scripts` that can be used to download these. Instead of running one at a time, use the below command to download dataset from all the stages of preprocessing
    1. `./utility_scripts/download_all_data_and_models.sh`
    2. This will display the download progress and should take about 3mins depending on internet bandwidth
    3. It will download all the zipped data sets to `dataset` folder and unzips them into the same location.
 
 ### 3. Run the model scripts [data_prep->train->save best model weights->validate->display plots]
+Make sure current working directory is `code`
 1. This project contains 4 fully implemented deep learning models using different techniques that can be accessed using `run_lipreading_model.py`. Running it with `--help` will give us the usage details.
    1. Command: `python run_lipreading_model.py --help`
    2. Output: 
