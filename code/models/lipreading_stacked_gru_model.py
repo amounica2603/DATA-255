@@ -106,7 +106,7 @@ class LipreadingGRUModel:
             [train_encoder_input_data, train_decoder_input_data, train_decoder_input_data, train_decoder_input_data],
             train_decoder_target_data,
             batch_size=64,
-            epochs=100,
+            epochs=self.epochs,
             validation_data=(
                 [val_encoder_input_data, val_decoder_input_data, val_decoder_input_data, val_decoder_input_data],
                 val_decoder_target_data),
