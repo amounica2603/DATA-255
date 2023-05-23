@@ -1,8 +1,6 @@
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.layers import Conv3D, MaxPooling3D, BatchNormalization, Input, Flatten, Dense, Reshape, \
-    RepeatVector, LSTM, TimeDistributed
-from tensorflow.keras import Sequential, Model
-import keras
+from tensorflow.keras.layers import Input, Dense, SimpleRNN, Concatenate, Dot
+from tensorflow.keras.models import Model
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 import matplotlib.pyplot as plt
 
@@ -16,7 +14,7 @@ time_steps_decoder = 5
 
 # The LipreadingLSTMModel class defines a model that uses LSTM layers for encoding and decoding input sequences, and
 # includes functions for training the model and plotting its loss and accuracy.
-class LipreadingLSTMModel:
+class LipreadingRNNModel:
     def __init__(self, data, epochs=100, initial_lr=0.01, validation_split=0.2):
         self.data = data
         self.epochs = epochs
@@ -51,7 +49,7 @@ class LipreadingLSTMModel:
 
         # Define the decoder input layer
         decoder_inputs = Input(shape=(16, 50))
-        # print(decoder_inputs.shape)
+
         # Initialize the initial state with the encoder state
         initial_state = [state_h]
 
@@ -63,7 +61,6 @@ class LipreadingLSTMModel:
         attention_weights1 = attention_layer2(attention_weights)
         attention_weights2 = attention_layer3(attention_weights1)
 
-        # print(attention_weights.shape)
         # Perform dot product between attention weights and encoder outputs
         context_vector = Dot(axes=1)([attention_weights2, encoder_outputs])
 

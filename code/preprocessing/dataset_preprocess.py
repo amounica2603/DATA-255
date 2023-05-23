@@ -144,7 +144,7 @@ class LipReadingImageProcessor:
             np.save(os.path.join(self.processed_features_path, instance_path),
                     img_feature_stack)
 
-    def get_datasets_for_model(self):
+    def get_datasets_for_model(self, padding_len=6):
         """
         This function loads preprocessed data into memory and returns the encoder input data, decoder input data, and
         decoder target data for a model.
@@ -154,7 +154,7 @@ class LipReadingImageProcessor:
         # specify the preprocessed dataset path
         person_ids, uttr_indexes, instances = self.get_dataset_metadata()
 
-        label_tokenizer = LabelTokenizer()
+        label_tokenizer = LabelTokenizer(padding_len)
         # Load the data into memory
         encoder_input_data = []
         target_texts = []

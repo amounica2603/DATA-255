@@ -7,8 +7,9 @@ from keras.utils import to_categorical
 # The `LabelTokenizer` class tokenizes target texts, pads them, and returns decoder input and target data as one-hot
 # encoded vectors.
 class LabelTokenizer:
-    def __init__(self):
+    def __init__(self, padding_len):
         self.num_decoder_tokens = 50
+        self.padding_len = padding_len
         self.tokenizer = Tokenizer(num_words=self.num_decoder_tokens)
         # Define the phrases to be predicted
         self.phrases = ['Stop navigation.', 'Excuse me.', 'I am sorry.', 'Thank you.', 'Good bye.', 'I love this game.',
@@ -33,7 +34,7 @@ class LabelTokenizer:
         decoder_target_data = []
         sequences = self.tokenizer.texts_to_sequences(target_texts)
         sequences_np = np.array(sequences, dtype=object)
-        sequences_padded = pad_sequences(sequences_np, padding='post', truncating='post', maxlen=6)
+        sequences_padded = pad_sequences(sequences_np, padding='post', truncating='post', maxlen=self.padding_len)
         for seq in sequences_padded:
             y = to_categorical(seq, self.num_decoder_tokens)
             decoder_input_data.append(y[:-1])
