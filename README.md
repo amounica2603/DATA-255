@@ -107,4 +107,9 @@ Make sure current working directory is `code`
 
 ## Contributions
 
-1. Literature Survey
+1. Literature Survey - 3-5 Papers by each team members.
+2. DATA COLLECTION - All Members
+3. DATA PRE-PROCESSING - Face extraction & Mouth extraction-Mythri, Preparing phrases and words and combining them in training dataset- Himanshee, Image feature extraction and Data Augumentation-Mounica, Data preparation for modeling-Richa
+4. MODEL IMPLEMENTATION - LSTM- Mythri, Stacked GRU- Mounica, RNN+Attention- Richa, Self-Attention+FC- Himanshee
+5. DOCUMENTATION AND REPORT - All members 
+6. DEMO APP - All members 
