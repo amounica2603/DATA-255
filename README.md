@@ -59,7 +59,7 @@ code
 - The execution of this project will need below system requirements
   1. Python 3.9 is used for the development and it should be installed in the system before proceeding further.
   2. Git to clone this reporsitory to local system
-  3. Bash shell to execute the shell under utility_scripts folder that primarily uses curl command to download the datasets and shape predictor models for preprocessing 
+  3. Bash shell to execute the shell script under utility_scripts folder that primarily uses curl command to download the datasets and shape predictor models for preprocessing 
 ### 1. Environment Setup and Dependencies
 1. Clone this repository to local machine running below command in your terminal
    1. `git clone https://github.com/ayalasomayajulamounica/DATA-255.git` 
